@@ -1,0 +1,2239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Основы HTML — интерактивный учебник</title>
+<style>
+  :root {
+    /* MARATHON-палитра: бумажная база, графит, функциональные акценты. */
+    --bg: #e9e3d3;        /* тёплый off-white / бумага */
+    --panel: #efe9da;     /* светлая панель (карточки) */
+    --panel-2: #ded6c1;   /* нажатое / активное */
+    --accent: #ff3b2f;    /* коралл/алый — действия, активное */
+    --accent-2: #00a39c;  /* циан-бирюза — метки, ссылки */
+    --acid: #ece300;      /* кислотно-жёлтый — hazard, сигнал */
+    --code: #ff3b2f;      /* акцент инлайн-кода */
+    --text: #15140d;      /* графитово-чёрный — текст и линии */
+    --muted: #6d6a5c;     /* бетонно-серый (читаемый на бумаге) */
+    --border: #15140d;    /* жёсткие чёрные края */
+    --code-bg: #15140d;   /* тёмная рабочая зона (редактор, код) */
+    --note-bg: #efe9da;
+    --radius: 0;          /* резкие края — без скругления */
+    --mono: "Consolas", "SF Mono", "JetBrains Mono", "Courier New", monospace;
+    --display: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+    --chip-bg: #ffffff;   /* фон инлайн-кода (светлая тема) */
+  }
+
+  /* Тёмная тема — та же айдентика в негативе: графит-база,
+     тёплый off-white текст и линии, те же сигнальные акценты. */
+  :root[data-theme="dark"] {
+    --bg: #14130c;        /* графитовая база */
+    --panel: #201e15;     /* панель чуть светлее базы */
+    --panel-2: #2b2819;   /* нажатое / активное */
+    --accent: #ff4a3d;    /* коралл (чуть ярче на тёмном) */
+    --accent-2: #1ac6bd;  /* циан-бирюза ярче */
+    --acid: #d8b000;      /* приглушённый янтарный — мягче для глаз в тёмной теме */
+    --code: #ff4a3d;
+    --text: #ece6d4;      /* тёплый off-white — текст и линии */
+    --muted: #9a9684;     /* бетон светлее для читаемости */
+    --border: #ece6d4;    /* жёсткие светлые края */
+    --code-bg: #0b0a06;   /* самая тёмная рабочая зона */
+    --note-bg: #201e15;
+    --chip-bg: #26241a;   /* фон инлайн-кода (тёмная тема) */
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    font-size: 16px;
+  }
+
+  /* ---------- Шапка ---------- */
+  header.top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 24px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  header.top .logo {
+    font-family: var(--mono);
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--accent);
+    letter-spacing: -1px;
+  }
+  header.top h1 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+  }
+  header.top .sub {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: .85rem;
+  }
+
+  /* ---------- Сетка ---------- */
+  .layout {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* ---------- Левая панель ---------- */
+  nav.lessons {
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    padding: 18px 10px;
+    overflow-y: auto;
+  }
+  nav.lessons h2 {
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--muted);
+    margin: 4px 12px 12px;
+    font-weight: 600;
+  }
+  .lesson-btn {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    color: var(--text);
+    border: none;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: .92rem;
+    margin-bottom: 2px;
+    transition: background .15s;
+  }
+  .lesson-btn:hover { background: var(--panel-2); }
+  .lesson-btn.active {
+    background: var(--panel-2);
+    box-shadow: inset 3px 0 0 var(--accent);
+    color: #fff;
+  }
+  .lesson-btn .num {
+    width: 24px;
+    height: 24px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: .78rem;
+    color: var(--muted);
+  }
+  .lesson-btn.active .num {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ---------- Контент ---------- */
+  main.content {
+    padding: 28px 36px 70px;
+    overflow-y: auto;
+  }
+  .wrap { max-width: 1160px; margin: 0 auto; }
+  .lesson-head h2 {
+    font-size: 1.7rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+  }
+  .lesson-head .tagline {
+    color: var(--muted);
+    margin: 0 0 22px;
+    font-size: 1rem;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 26px;
+    margin-bottom: 18px;
+  }
+  .card h3 { margin-top: 0; font-size: 1.15rem; font-weight: 600; }
+  .card p { line-height: 1.65; }
+  .card ul { line-height: 1.7; }
+  code.inline {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 5px;
+    font-family: var(--mono);
+    color: var(--code);
+    font-size: .88em;
+  }
+  .note {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--note-bg);
+    border: 1px solid #1f3a5f;
+    border-left: 3px solid var(--accent);
+    padding: 13px 16px;
+    border-radius: 8px;
+    margin: 16px 0;
+  }
+  .note .label {
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--accent);
+    text-transform: uppercase;
+    flex: none;
+    padding-top: 2px;
+    min-width: 92px;
+  }
+  .note p { margin: 0; line-height: 1.55; }
+  .tag-table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .tag-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .tag-table tr:last-child td { border-bottom: none; }
+  .tag-table td:first-child { white-space: nowrap; width: 1%; }
+
+  /* ---------- Песочница ---------- */
+  .sandbox {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .editor-pane, .preview-pane {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 480px;
+  }
+  .pane-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    font-size: .8rem;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+  .pane-bar .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .dot.r { background: #ff5f56; } .dot.y { background: #ffbd2e; } .dot.g { background: #27c93f; }
+  textarea.editor {
+    flex: 1;
+    width: 100%;
+    border: none;
+    resize: none;
+    background: var(--code-bg);
+    color: #c9d1d9;
+    font-family: var(--mono);
+    font-size: .92rem;
+    line-height: 1.6;
+    padding: 16px;
+    outline: none;
+    tab-size: 2;
+  }
+  .preview-pane iframe {
+    flex: 1;
+    width: 100%;
+    border: none;
+    background: #fff;
+  }
+  .sandbox-toolbar {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .btn {
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: filter .15s, background .15s;
+  }
+  .btn-run {
+    background: var(--accent-2);
+    color: #0d1117;
+  }
+  .btn-run:hover { filter: brightness(1.1); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border-color: var(--border);
+  }
+  .btn-ghost:hover { background: var(--panel-2); }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .hint {
+    color: var(--muted);
+    font-size: .82rem;
+    margin-left: auto;
+    font-family: var(--mono);
+  }
+
+  /* Блок с готовым кодом внутри теории (не редактируемый). */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 10px 0 0;
+    overflow: auto;
+    font-family: var(--mono);
+    font-size: .85rem;
+    color: #c9d1d9;
+  }
+
+  /* ---------- Схема семантики ---------- */
+  .page-map { margin: 4px 0; }
+  .pm-box { border: 1px solid var(--accent); border-radius: 6px; padding: 9px; margin: 6px 0; text-align: center; font-family: var(--mono); font-size: .9rem; background: rgba(88,166,255,.06); }
+  .pm-row { display: flex; gap: 8px; }
+  .pm-main { flex: 1; }
+  .pm-aside { width: 170px; }
+  .pm-article { border: 1px dashed var(--muted); border-radius: 6px; padding: 7px; margin: 6px; font-family: var(--mono); font-size: .85rem; }
+  .pm-small { font-size: .78rem; color: var(--muted); font-family: var(--mono); }
+
+  /* ---------- Низ ---------- */
+  .lesson-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+  }
+  footer.foot {
+    text-align: center;
+    padding: 14px;
+    color: var(--muted);
+    font-size: .8rem;
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.lessons {
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    nav.lessons h2 { width: 100%; }
+    .lesson-btn { width: auto; }
+    main.content { padding: 20px 16px 50px; }
+    .sandbox { grid-template-columns: 1fr; }
+    .editor-pane, .preview-pane { min-height: 340px; }
+    .note .label { min-width: 0; }
+  }
+
+  /* ============================================================
+     MARATHON SKIN — визуальный протокол поверх базовой разметки.
+     Бумага + графит, жёсткие края, капслок-гротеск, color-blocking.
+     ============================================================ */
+
+  body { font-family: Arial, "Helvetica Neue", Helvetica, sans-serif; }
+
+  /* Жёсткие края везде — никакого скругления. */
+  .card, .note, .btn, .lesson-btn, .lesson-btn .num, code.inline,
+  .code-block, .editor-pane, .preview-pane, .pm-box, .pm-article,
+  .pane-bar .dot, .logo, .reg { border-radius: 0 !important; }
+
+  /* --- Hazard-штриховка: сигнальная полоса-разделитель. --- */
+  /* Hazard-лента всегда чёрно-жёлтая (и в светлой, и в тёмной теме):
+     чёрный отделяет жёлтый, поэтому не рябит. #15140d — фикс. графит. */
+  .hazard {
+    height: 10px;
+    background: repeating-linear-gradient(45deg,
+      #15140d 0 14px, var(--acid) 14px 28px);
+    border-bottom: 2px solid var(--text);
+  }
+
+  /* --- Шапка --- */
+  header.top { gap: 16px; border-bottom: none; }
+  .logo {
+    background: var(--text);
+    color: var(--bg);
+    font-family: var(--display);
+    font-weight: 800;
+    letter-spacing: .5px;
+    padding: 5px 10px;
+    font-size: 1.1rem;
+    border: 2px solid var(--text);
+  }
+  .brandline { display: flex; flex-direction: column; line-height: 1.12; }
+  header.top h1 {
+    font-family: var(--display);
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: .3px;
+    font-size: 1.35rem;
+  }
+  header.top .sub {
+    margin: 0;
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: .7rem;
+    color: var(--accent-2);
+  }
+  .reg {
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: .7rem;
+    color: var(--accent);
+    border: 1px solid var(--text);
+    padding: 4px 8px;
+    white-space: nowrap;
+  }
+
+  /* Переключатель темы — служебная кнопка, толкается к правому краю. */
+  .theme-toggle {
+    margin-left: auto;
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: .7rem;
+    color: var(--text);
+    background: var(--bg);
+    border: 2px solid var(--text);
+    padding: 4px 10px;
+    cursor: pointer;
+    border-radius: 0;
+    white-space: nowrap;
+  }
+  .theme-toggle:hover { background: var(--acid); color: #15140d; }   /* тёмный текст на жёлтом */
+  .theme-toggle + .reg { margin-left: 10px; }
+
+  /* --- Боковое меню --- */
+  nav.lessons { border-right: 2px solid var(--text); }
+  nav.lessons h2 { font-family: var(--mono); color: var(--text); }
+  nav.lessons h2::before { content: "// "; color: var(--accent); }
+  .lesson-btn { border: 1px solid transparent; font-weight: 600; }
+  .lesson-btn.active {
+    background: var(--bg);
+    color: var(--text);
+    box-shadow: none;
+    border: 1px solid var(--text);
+    border-left: 5px solid var(--accent);
+  }
+  .lesson-btn .num {
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    font-weight: 700;
+  }
+  .lesson-btn.active .num { background: var(--accent); color: var(--bg); }
+
+  /* --- Заголовок урока --- */
+  .lesson-head h2 {
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .2px;
+    font-size: 2rem;
+    border-left: 8px solid var(--accent);
+    padding-left: 14px;
+  }
+  .lesson-head .tagline {
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    font-size: .78rem;
+    color: var(--muted);
+    padding-left: 14px;
+  }
+
+  /* --- Карточки + реги-крест в углу («протокольная» метка). --- */
+  .card { border: 2px solid var(--text); position: relative; }
+  .card::after {
+    content: "+";
+    position: absolute;
+    top: 5px; right: 9px;
+    font-family: var(--mono);
+    color: var(--accent-2);
+    font-size: .95rem;
+    line-height: 1;
+  }
+  .card h3 {
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .3px;
+    font-size: 1.25rem;
+  }
+
+  /* Инлайн-код — светлый чип с жёсткой рамкой. */
+  code.inline { background: var(--chip-bg); border: 1px solid var(--text); color: var(--text); }
+
+  /* Блок готового кода — тёмная рабочая зона. */
+  .code-block { border: 2px solid var(--text); color: #e9e3d3; }
+
+  /* --- Заметки-callout --- */
+  .note { background: var(--panel); border: 2px solid var(--text); border-left: 6px solid var(--accent); }
+  .note .label { font-family: var(--mono); color: var(--accent); }
+
+  /* --- Таблицы тегов --- */
+  .tag-table td { border-bottom: 1px solid var(--text); }
+  .tag-table td:first-child { font-weight: 700; }
+
+  /* --- Песочница --- */
+  .editor-pane, .preview-pane { border: 2px solid var(--text); }
+  .pane-bar {
+    background: var(--text);
+    color: var(--bg);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .pane-bar .dot { width: 10px; height: 10px; }
+
+  /* Вкладки файлов: активная «вырезана» из бара цветом страницы
+     и подчёркнута кораллом — читается в обеих темах. */
+  .file-tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-left: 8px; }
+  .file-tab {
+    background: transparent;
+    color: inherit;
+    border: none;
+    border-radius: 0;
+    font: inherit;
+    text-transform: inherit;
+    letter-spacing: inherit;
+    padding: 3px 9px;
+    cursor: pointer;
+    opacity: .65;
+  }
+  .file-tab:hover { opacity: 1; }
+  .file-tab.active {
+    opacity: 1;
+    background: var(--bg);
+    color: var(--text);
+    box-shadow: inset 0 -3px 0 var(--accent);
+  }
+
+  /* Подписи «плохо / хорошо» над примерами кода в уроках про кодстайл. */
+  .code-caption {
+    margin: 16px 0 0;
+    font-family: var(--mono);
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+  }
+  .code-caption-bad  { color: var(--accent); }
+  .code-caption-good { color: var(--accent-2); }
+
+  /* Последний абзац карточки — без нижнего отступа (вместо style="…"). */
+  .card > p:last-child { margin-bottom: 0; }
+
+  /* --- Картинки «в папке проекта» под редактором --- */
+  .asset-strip {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 12px;
+    border: 2px dashed var(--text);
+  }
+  .asset-label {
+    font-family: var(--mono);
+    font-size: .72rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .asset { margin: 0; display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: .8rem; }
+  .asset img { width: 54px; height: 36px; object-fit: cover; border: 2px solid var(--text); background: #fff; }
+
+  /* --- Схема блочной модели: слои коробки цветными зонами --- */
+  .box-model { margin: 14px 0 18px; font-family: var(--mono); font-size: .75rem; text-transform: uppercase; letter-spacing: .5px; }
+  .bm-label { display: block; margin-bottom: 8px; }
+  .bm-margin { border: 2px dashed var(--muted); padding: 12px 16px 16px; color: var(--text); }
+  .bm-border { border: 8px solid var(--text); }
+  .bm-label-dark { margin: 0; padding: 3px 8px; background: var(--text); color: var(--bg); }
+  .bm-padding { background: var(--accent-2); color: #15140d; padding: 12px 18px 18px; }
+  .bm-content { background: var(--accent); color: #fff; padding: 16px; text-align: center; font-weight: 700; }
+
+  /* --- Пульт flexbox --- */
+  .flex-demo {
+    display: flex;
+    gap: 8px;
+    height: 200px;
+    margin: 14px 0;
+    padding: 8px;
+    border: 2px solid var(--text);
+    background: var(--bg);
+  }
+  .fd-item {
+    min-width: 60px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--display);
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #15140d;
+    border: 2px solid #15140d;
+  }
+  .fd-item:nth-child(1) { background: var(--accent); }
+  .fd-item:nth-child(2) { background: var(--accent-2); }
+  .fd-item:nth-child(3) { background: var(--acid); }
+  .flex-demo[data-flex-direction="column"]       { flex-direction: column; }
+  .flex-demo[data-justify-content="center"]       { justify-content: center; }
+  .flex-demo[data-justify-content="flex-end"]     { justify-content: flex-end; }
+  .flex-demo[data-justify-content="space-between"] { justify-content: space-between; }
+  .flex-demo[data-justify-content="space-around"]  { justify-content: space-around; }
+  .flex-demo[data-align-items="flex-start"]       { align-items: flex-start; }
+  .flex-demo[data-align-items="center"]           { align-items: center; }
+  .flex-demo[data-align-items="flex-end"]         { align-items: flex-end; }
+  .fd-controls { display: grid; gap: 8px; }
+  .fd-group { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .fd-label {
+    min-width: 140px;
+    font-family: var(--mono);
+    font-size: .72rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .fd-group button {
+    padding: 4px 10px;
+    font-family: var(--mono);
+    font-size: .78rem;
+    color: var(--text);
+    background: var(--bg);
+    border: 2px solid var(--text);
+    border-radius: 0;
+    cursor: pointer;
+  }
+  .fd-group button:hover { background: var(--panel-2); }
+  .fd-group button.active { background: var(--text); color: var(--bg); }
+  .dot.r { background: var(--accent); }
+  .dot.y { background: var(--acid); }
+  .dot.g { background: var(--accent-2); }
+
+  /* Кнопки — плоские, жёсткие, капслок. */
+  .btn {
+    font-family: var(--display);
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    border: 2px solid var(--text);
+  }
+  .btn-run { background: var(--accent); color: var(--bg); }
+  .btn-run:hover { filter: none; background: #e22c20; }
+  .btn-ghost { background: var(--bg); color: var(--text); }
+  .btn-ghost:hover { background: var(--panel-2); }
+  .hint { color: var(--muted); text-transform: uppercase; }
+
+  /* --- Схема семантики: color-blocking по зонам. --- */
+  .pm-box { border: 2px solid var(--text); background: var(--bg); font-weight: 700; }
+  .page-map > .pm-box:nth-child(1) { background: var(--accent); color: var(--bg); }
+  .page-map > .pm-box:nth-child(2) { background: var(--accent-2); color: var(--bg); }
+  .page-map > .pm-box:last-child  { background: var(--muted); color: var(--bg); }
+  .pm-aside { background: var(--acid); color: #15140d; }   /* тёмный текст на жёлтом — не рябит */
+  .pm-article { border: 1px dashed var(--text); }
+  .pm-small { color: inherit; opacity: .85; }
+
+  /* --- Подвал --- */
+  footer.foot {
+    border-top: 2px solid var(--text);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    font-family: var(--mono);
+    font-size: .72rem;
+  }
+  .foot-tag { color: var(--accent); margin: 0 8px; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <span class="logo">HTML</span>
+  <div class="brandline">
+    <h1>Основы HTML</h1>
+    <span class="sub">SYS // интерактивный протокол вёрстки</span>
+  </div>
+  <button class="theme-toggle" id="themeToggle" type="button">☾ ТЬМА</button>
+  <span class="reg">BUILD v6 · REC °</span>
+</header>
+<div class="hazard"></div>
+
+<div class="layout">
+  <nav class="lessons" id="lessonList">
+    <h2>Содержание</h2>
+    <!-- кнопки уроков добавит скрипт -->
+  </nav>
+
+  <main class="content">
+    <div class="wrap" id="content">
+      <!-- содержимое урока добавит скрипт -->
+    </div>
+  </main>
+</div>
+
+<div class="hazard"></div>
+<footer class="foot">
+  <span class="foot-tag">SYS//HTML</span>
+  Меняй код в редакторе и нажимай «Запустить» — результат появится справа. Экспериментируй: ошибки тут безопасны.
+  <span class="foot-tag">// END</span>
+</footer>
+
+<script>
+/* ============================================================
+   КАРТИНКИ ПРОЕКТА
+   Встроенные SVG-файлы, чтобы примеры работали без интернета.
+   В коде ученика на них ссылаются по имени: url("stars.svg"),
+   src="photo.svg" — песочница сама подставляет содержимое.
+   ============================================================ */
+const ASSETS = {
+  "cat.svg": '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect width="300" height="200" fill="#cfe8ff"/><text x="150" y="150" font-size="120" text-anchor="middle">🐱</text></svg>',
+  "stars.svg": '<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><rect width="60" height="60" fill="#1d2b53"/><circle cx="15" cy="15" r="3" fill="#ffd54f"/><circle cx="45" cy="38" r="2" fill="#ffffff"/><circle cx="30" cy="52" r="1.5" fill="#ffd54f"/></svg>',
+  "mountains.svg": '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200" viewBox="0 0 400 200"><rect width="400" height="200" fill="#9fd3ff"/><circle cx="320" cy="55" r="28" fill="#ffd54f"/><polygon points="0,200 110,70 220,200" fill="#5b8c5a"/><polygon points="150,200 270,90 400,200" fill="#3f6e45"/></svg>',
+  "photo.svg": '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="140" viewBox="0 0 200 140"><rect width="200" height="140" fill="#cfe8ff"/><text x="100" y="105" font-size="80" text-anchor="middle">🙂</text></svg>'
+};
+
+/* ============================================================
+   ДАННЫЕ УРОКОВ
+   ============================================================ */
+const LESSONS = [
+  {
+    id: "intro",
+    title: "Что такое HTML и теги",
+    tagline: "Язык, из которого состоят все веб-страницы",
+    html: `
+      <div class="card">
+        <h3>HTML — язык разметки веб-страниц</h3>
+        <p>Любая страница в интернете — это текст на языке <b>HTML</b>. Браузер читает этот текст и превращает его в то, что ты видишь на экране: заголовки, абзацы, картинки, кнопки.</p>
+        <p>HTML состоит из <b>тегов</b> — команд, которые размечают содержимое: «здесь заголовок», «здесь абзац», «здесь изображение».</p>
+        <p>Большинство тегов <b>парные</b> — открывающий и закрывающий (со слешем <code class="inline">/</code>). Между ними находится содержимое:</p>
+        <table class="tag-table">
+          <tr><td><code class="inline">&lt;p&gt;</code></td><td>открывающий тег — начало абзаца</td></tr>
+          <tr><td><code class="inline">&lt;/p&gt;</code></td><td>закрывающий тег — конец абзаца</td></tr>
+        </table>
+        <p>Есть и <b>одиночные</b> теги, которым нечего закрывать — например, изображение <code class="inline">&lt;img&gt;</code> или перенос строки <code class="inline">&lt;br&gt;</code>.</p>
+        <p>У тегов бывают <b>атрибуты</b> — дополнительные настройки внутри открывающего тега. Например, атрибут <code class="inline">href</code> у ссылки задаёт адрес, куда она ведёт.</p>
+        <div class="note">
+          <span class="label">Запомни</span>
+          <p>Тег = контейнер для содержимого. Атрибут = настройка этого контейнера, записанная как <code class="inline">имя="значение"</code>.</p>
+        </div>
+      </div>`,
+    code: `<p>Это мой первый абзац.</p>
+<p>А это второй абзац со <strong>важным</strong> словом.</p>`
+  },
+
+  {
+    id: "skeleton",
+    title: "Структура документа",
+    tagline: "Обязательная основа любой HTML-страницы",
+    html: `
+      <div class="card">
+        <h3>Каждая страница имеет обязательную структуру</h3>
+        <p>Эти теги присутствуют в любом HTML-документе — это его каркас:</p>
+        <table class="tag-table">
+          <tr><td><code class="inline">&lt;!DOCTYPE html&gt;</code></td><td>Первая строка документа. Сообщает браузеру, что это современный HTML.</td></tr>
+          <tr><td><code class="inline">&lt;html&gt;</code></td><td>Корневой тег — внутри него находится вся страница.</td></tr>
+          <tr><td><code class="inline">&lt;head&gt;</code></td><td>Служебная часть: настройки документа, которые не отображаются на странице.</td></tr>
+          <tr><td><code class="inline">&lt;meta charset="UTF-8"&gt;</code></td><td>Кодировка. Отвечает за корректное отображение русских букв — без неё текст может превратиться в «кракозябры».</td></tr>
+          <tr><td><code class="inline">&lt;title&gt;</code></td><td>Заголовок вкладки браузера.</td></tr>
+          <tr><td><code class="inline">&lt;body&gt;</code></td><td>Видимая часть: весь контент, который видит пользователь.</td></tr>
+        </table>
+        <div class="note">
+          <span class="label">Head и Body</span>
+          <p><code class="inline">head</code> — «настройки» страницы (их не видно), <code class="inline">body</code> — её содержимое (его видно). Запусти пример: текст из <code class="inline">title</code> не появится на странице — он только во вкладке.</p>
+        </div>
+        <div class="note">
+          <span class="label">В уроках</span>
+          <p>Дальше в редакторе мы будем писать только нужный фрагмент (например, один абзац) — браузер корректно обработает и его. Но реальная страница всегда содержит полную структуру целиком.</p>
+        </div>
+      </div>`,
+    code: `<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <title>Моя страница</title>
+  </head>
+  <body>
+    <h1>Привет, мир!</h1>
+    <p>Это содержимое страницы — его видно.</p>
+  </body>
+</html>`
+  },
+
+  {
+    id: "text",
+    title: "Текстовые теги",
+    tagline: "Заголовки, абзацы, выделение текста",
+    html: `
+      <div class="card">
+        <h3>Теги для работы с текстом</h3>
+        <table class="tag-table">
+          <tr><td><code class="inline">&lt;h1&gt;</code> … <code class="inline">&lt;h6&gt;</code></td><td>Заголовки шести уровней. <code class="inline">h1</code> — самый главный и крупный, <code class="inline">h6</code> — самый мелкий. На странице обычно один <code class="inline">h1</code>.</td></tr>
+          <tr><td><code class="inline">&lt;p&gt;</code></td><td>Абзац текста (paragraph).</td></tr>
+          <tr><td><code class="inline">&lt;strong&gt;</code></td><td>Важный текст — браузер отображает его полужирным.</td></tr>
+          <tr><td><code class="inline">&lt;em&gt;</code></td><td>Текст со смысловым акцентом — отображается курсивом.</td></tr>
+          <tr><td><code class="inline">&lt;br&gt;</code></td><td>Перенос строки (одиночный тег).</td></tr>
+        </table>
+        <div class="note">
+          <span class="label">Структура</span>
+          <p>Заголовки задают иерархию документа, как оглавление книги: <code class="inline">h1</code> — название, <code class="inline">h2</code> — разделы, <code class="inline">h3</code> — подразделы. Не выбирай уровень «по размеру шрифта» — выбирай по смыслу.</p>
+        </div>
+        <p>Попробуй в примере поменять уровень заголовка (<code class="inline">h1</code> → <code class="inline">h3</code>) и посмотри на результат.</p>
+      </div>`,
+    code: `<h1>Главный заголовок</h1>
+<h2>Заголовок раздела</h2>
+
+<p>Обычный абзац текста. Здесь есть
+  <strong>важное</strong> слово и слово
+  <em>с акцентом</em>.</p>
+
+<p>Первая строка<br>
+  Вторая строка после переноса</p>`
+  },
+
+  {
+    id: "lists",
+    title: "Списки",
+    tagline: "Маркированные и нумерованные перечни",
+    html: `
+      <div class="card">
+        <h3>Теги для списков</h3>
+        <table class="tag-table">
+          <tr><td><code class="inline">&lt;ul&gt;</code></td><td>Маркированный список — пункты с точками (unordered — неупорядоченный).</td></tr>
+          <tr><td><code class="inline">&lt;ol&gt;</code></td><td>Нумерованный список — пункты с номерами 1, 2, 3 (ordered — упорядоченный).</td></tr>
+          <tr><td><code class="inline">&lt;li&gt;</code></td><td>Пункт списка (list item). Располагается внутри <code class="inline">ul</code> или <code class="inline">ol</code>.</td></tr>
+        </table>
+        <div class="note">
+          <span class="label">Разница</span>
+          <p>Выбирай <code class="inline">ol</code>, когда порядок важен (шаги инструкции), и <code class="inline">ul</code>, когда это просто перечисление. Попробуй заменить <code class="inline">ul</code> на <code class="inline">ol</code> в примере.</p>
+        </div>
+      </div>`,
+    code: `<h2>Список снаряжения</h2>
+<ul>
+  <li>Палатка</li>
+  <li>Фонарик</li>
+  <li>Вода</li>
+</ul>
+
+<h2>Порядок действий</h2>
+<ol>
+  <li>Вскипятить воду</li>
+  <li>Засыпать чай</li>
+  <li>Подождать три минуты</li>
+</ol>`
+  },
+
+  {
+    id: "links",
+    title: "Ссылки",
+    tagline: "Переходы между страницами",
+    html: `
+      <div class="card">
+        <h3>Как работает тег &lt;a&gt;</h3>
+        <p>Тег <code class="inline">&lt;a&gt;</code> (от англ. <i>anchor</i> — «якорь») превращает текст в <b>кликабельную ссылку</b>. Когда пользователь нажимает на неё, браузер открывает адрес, указанный в атрибуте <code class="inline">href</code>.</p>
+        <p>Любая ссылка состоит из четырёх частей:</p>
+        <table class="tag-table">
+          <tr><td><code class="inline">&lt;a</code></td><td>начало открывающего тега</td></tr>
+          <tr><td><code class="inline">href="адрес"</code></td><td>главный атрибут — <b>куда</b> ведёт ссылка</td></tr>
+          <tr><td>текст между тегами</td><td>то, что видно на странице и на что нажимают (браузер выделяет его цветом и подчёркиванием)</td></tr>
+          <tr><td><code class="inline">&lt;/a&gt;</code></td><td>закрывающий тег</td></tr>
+        </table>
+        <div class="note">
+          <span class="label">Как видит браузер</span>
+          <p>В записи <code class="inline">&lt;a href="https://example.com"&gt;Открыть сайт&lt;/a&gt;</code> браузер понимает так: «показать слова <b>Открыть сайт</b> как ссылку, а по клику перейти на <b>https://example.com</b>».</p>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Что можно указать в href</h3>
+        <table class="tag-table">
+          <tr><td><code class="inline">href="https://example.com"</code></td><td>Полный адрес <b>другого сайта</b> в интернете.</td></tr>
+          <tr><td><code class="inline">href="about.html"</code></td><td>Имя файла <b>другой страницы</b> этого же сайта (лежит рядом).</td></tr>
+          <tr><td><code class="inline">href="#контакты"</code></td><td><b>Якорь</b> — прыжок к блоку с <code class="inline">id="контакты"</code> на этой же странице.</td></tr>
+        </table>
+        <div class="note">
+          <span class="label">Новая вкладка</span>
+          <p>Атрибут <code class="inline">target="_blank"</code> открывает ссылку в <b>новой вкладке</b>, не закрывая текущую страницу.</p>
+        </div>
+        <p>В примере — страница с оглавлением. Пункты оглавления — это якоря: они прокручивают страницу к нужному разделу. В разделе «Ссылка на другой сайт» есть внешняя ссылка-заглушка.</p>
+      </div>`,
+    code: `<h2 id="top">Оглавление</h2>
+<ul>
+  <li><a href="#part1">Что такое ссылка</a></li>
+  <li><a href="#part2">Ссылка на другой сайт</a></li>
+  <li><a href="#part3">Ссылка на страницу своего сайта</a></li>
+  <li><a href="#part4">Якоря</a></li>
+</ul>
+
+<h3 id="part1">Что такое ссылка</h3>
+<p>Ссылка — это текст, по которому можно кликнуть,
+  чтобы перейти в другое место: на другую страницу
+  или к другой части этой же страницы. Ссылки
+  связывают страницы интернета в одну большую сеть.</p>
+
+<h3 id="part2">Ссылка на другой сайт</h3>
+<p>Этот адрес откроется в новой вкладке:
+  <a href="https://example.com" target="_blank">Пример сайта</a>.
+  Сайт example.com специально сделан для примеров,
+  поэтому по нему можно смело кликать.</p>
+
+<h3 id="part3">Ссылка на страницу своего сайта</h3>
+<p>Если страницы сайта лежат в одной папке, в href
+  пишут просто имя файла, например about.html.
+  Полный адрес с https:// для этого не нужен:
+  браузер сам найдёт файл рядом с текущей страницей.
+  Так связывают между собой страницы одного сайта:
+  главную, «О нас», «Контакты».</p>
+
+<h3 id="part4">Якоря</h3>
+<p>Пункты оглавления наверху — это якоря. Каждый из них
+  ведёт к заголовку с нужным id на этой же странице.
+  Так устроены оглавления в длинных статьях,
+  например в энциклопедиях.</p>
+
+<p><a href="#top">↑ Наверх к оглавлению</a></p>`
+  },
+
+  {
+    id: "images",
+    title: "Изображения",
+    tagline: "Тег img и атрибут alt",
+    html: `
+      <div class="card">
+        <h3>Тег изображения &lt;img&gt;</h3>
+        <p>Это одиночный тег — закрывать его не нужно. У него два ключевых атрибута:</p>
+        <table class="tag-table">
+          <tr><td><code class="inline">src</code></td><td>Адрес картинки (source). Путь к файлу или ссылка в интернете.</td></tr>
+          <tr><td><code class="inline">alt</code></td><td>Текстовое описание. Показывается, если картинка не загрузилась, и читается программами для незрячих пользователей.</td></tr>
+          <tr><td><code class="inline">width</code></td><td>Ширина изображения в пикселях.</td></tr>
+        </table>
+        <div class="note">
+          <span class="label">Про alt</span>
+          <p>Атрибут <code class="inline">alt</code> указывают всегда — это часть доступности и признак аккуратной вёрстки. В <code class="inline">src</code> пишут путь к файлу картинки. В примере файл <code class="inline">cat.svg</code> лежит в папке проекта рядом со страницей — его видно под редактором, — поэтому достаточно написать <code class="inline">src="cat.svg"</code>.</p>
+        </div>
+        <p>Измени <code class="inline">src</code> на несуществующий адрес — и увидишь, как вместо картинки появится текст из <code class="inline">alt</code>.</p>
+      </div>`,
+    code: `<h2>Любимое животное</h2>
+
+<img src="cat.svg" alt="Кот" width="300">
+
+<p>Если в src написать несуществующий адрес,
+  вместо картинки появится текст из alt.</p>`,
+    assets: {
+      "cat.svg": ASSETS["cat.svg"]
+    }
+  },
+
+  {
+    id: "semantic",
+    title: "Структурные теги",
+    tagline: "header, nav, main, article, aside, footer",
+    html: `
+      <div class="card">
+        <h3>Семантические теги — смысловые блоки страницы</h3>
+        <p>Можно верстать всё универсальными блоками, но есть специальные теги, которые своим именем описывают, что внутри. Это понятнее людям и поисковым системам.</p>
+        <table class="tag-table">
+          <tr><td><code class="inline">&lt;header&gt;</code></td><td>Шапка — верхняя часть: логотип, название сайта.</td></tr>
+          <tr><td><code class="inline">&lt;nav&gt;</code></td><td>Навигация — меню со ссылками по сайту.</td></tr>
+          <tr><td><code class="inline">&lt;main&gt;</code></td><td>Основное содержимое страницы (одно на странице).</td></tr>
+          <tr><td><code class="inline">&lt;article&gt;</code></td><td>Самостоятельный блок: статья, новость, пост.</td></tr>
+          <tr><td><code class="inline">&lt;section&gt;</code></td><td>Смысловой раздел внутри страницы.</td></tr>
+          <tr><td><code class="inline">&lt;aside&gt;</code></td><td>Второстепенное содержимое сбоку: реклама, ссылки по теме.</td></tr>
+          <tr><td><code class="inline">&lt;footer&gt;</code></td><td>Подвал — нижняя часть: контакты, копирайт.</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Схема типичной страницы</h3>
+        <div class="page-map">
+          <div class="pm-box">&lt;header&gt; <span class="pm-small">— шапка</span></div>
+          <div class="pm-box">&lt;nav&gt; <span class="pm-small">— меню</span></div>
+          <div class="pm-row">
+            <div class="pm-box pm-main">&lt;main&gt; <span class="pm-small">— основное</span>
+              <div class="pm-article">&lt;article&gt;</div>
+              <div class="pm-article">&lt;section&gt;</div>
+            </div>
+            <div class="pm-box pm-aside">&lt;aside&gt;<br><span class="pm-small">сбоку</span></div>
+          </div>
+          <div class="pm-box">&lt;footer&gt; <span class="pm-small">— подвал</span></div>
+        </div>
+        <p>Запусти пример и рассмотри структуру. Пунктирные рамки вокруг блоков в окне результата рисует сам учебник, чтобы были видны границы, — в твоём коде стилей нет. Как оформлять страницу, разберём в уроке «Стили и скрипты».</p>
+      </div>`,
+    /* Рамки только для наглядности: учебник подмешивает их в окно результата,
+       в код ученика они не попадают. */
+    previewCss: `header, nav, main, article, aside, footer {
+  outline: 2px dashed #58a6ff;
+  outline-offset: -2px;
+  padding: 8px;
+  margin: 6px 0;
+}
+nav a { margin-right: 12px; }`,
+    code: `<header>
+  <h1>Сайт о динозаврах</h1>
+</header>
+
+<nav>
+  <a href="https://example.com" target="_blank">Главная</a>
+  <a href="https://example.com" target="_blank">Виды</a>
+  <a href="https://example.com" target="_blank">Контакты</a>
+</nav>
+
+<main>
+  <article>
+    <h2>Тираннозавр</h2>
+    <p>Крупный хищник позднего мелового периода.</p>
+  </article>
+  <aside>
+    <p>Факт: у него были очень короткие передние лапы.</p>
+  </aside>
+</main>
+
+<footer>
+  <p>© 2026</p>
+</footer>`
+  },
+
+  {
+    id: "codestyle-html",
+    title: "Аккуратный HTML: отступы",
+    tagline: "Кодстайл: как писать вёрстку, понятную людям",
+    html: `
+      <div class="card">
+        <h3>Браузеру всё равно, людям — нет</h3>
+        <p>Браузер прочитает код и в одну строку, и с любыми отступами — страница получится одинаковой. Но код читают люди: учитель, одноклассник, ты сам через месяц. Код читают намного чаще, чем пишут.</p>
+        <p><b>Кодстайл</b> — это договорённость, как оформлять код: где ставить отступы, когда переносить строку, как называть классы. Если все пишут по одним правилам, в чужом коде легко разобраться.</p>
+      </div>
+      <div class="card">
+        <h3>Главное правило — отступ показывает вложенность</h3>
+        <p>Каждый тег, который лежит <b>внутри</b> другого, сдвигается на <b>2 пробела</b> правее родителя. Закрывающий тег стоит на той же вертикали, что и открывающий. Сравни:</p>
+        <p class="code-caption code-caption-bad">✕ Так плохо — не видно, что внутри чего</p>
+        <pre class="code-block"><code>&lt;nav&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="index.html"&gt;Главная&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="about.html"&gt;О нас&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/nav&gt;</code></pre>
+        <p class="code-caption code-caption-good">✓ Так хорошо — структура видна с первого взгляда</p>
+        <pre class="code-block"><code>&lt;nav&gt;
+  &lt;ul&gt;
+    &lt;li&gt;&lt;a href="index.html"&gt;Главная&lt;/a&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;a href="about.html"&gt;О нас&lt;/a&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/nav&gt;</code></pre>
+        <div class="note">
+          <span class="label">Лесенка</span>
+          <p>Хорошо оформленный код похож на лесенку: чем глубже вложен тег, тем дальше он от левого края. Если ступенька «съехала» — скорее всего, где-то пропущен закрывающий тег.</p>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Правила аккуратного HTML</h3>
+        <table class="tag-table">
+          <tr><td><b>Отступ</b></td><td>2 пробела на каждый уровень вложенности. Одинаково во всём файле — не смешивай 2 и 4 пробела.</td></tr>
+          <tr><td><b>Строки</b></td><td>Каждый блочный тег (<code class="inline">section</code>, <code class="inline">p</code>, <code class="inline">ul</code>, <code class="inline">li</code>) — с новой строки. Короткие строчные (<code class="inline">a</code>, <code class="inline">strong</code>, <code class="inline">em</code>) остаются внутри текста.</td></tr>
+          <tr><td><b>Регистр</b></td><td>Теги и атрибуты — маленькими буквами: <code class="inline">&lt;footer&gt;</code>, а не <code class="inline">&lt;FOOTER&gt;</code>.</td></tr>
+          <tr><td><b>Кавычки</b></td><td>Значения атрибутов — всегда в двойных кавычках: <code class="inline">class="card"</code>.</td></tr>
+          <tr><td><b>Закрытие</b></td><td>Каждый парный тег закрывай, даже если браузер «простит».</td></tr>
+          <tr><td><b>Пустые строки</b></td><td>Отделяй крупные блоки (<code class="inline">header</code>, <code class="inline">main</code>, <code class="inline">footer</code>) пустой строкой — код «дышит» и легче читается.</td></tr>
+          <tr><td><b>Комментарии</b></td><td><code class="inline">&lt;!-- текст --&gt;</code> — подпись для людей. Браузер её не показывает.</td></tr>
+        </table>
+        <div class="note">
+          <span class="label">Редактор помогает</span>
+          <p><b>Tab</b> добавляет 2 пробела, <b>Shift + Tab</b> убирает их, а <b>Enter</b> переносит строку с тем же отступом, что был у текущей.</p>
+        </div>
+        <p>В редакторе — рабочий, но неаккуратный код. Расставь отступы лесенкой, перенеси слипшиеся теги на отдельные строки и найди тег, записанный большими буквами. Запусти: страница не изменится, а код станет понятным.</p>
+      </div>`,
+    code: `<!-- Приведи этот код в порядок -->
+<header>
+<h1>Мой класс</h1>
+</header>
+<main>
+<section>
+<h2>Расписание на пятницу</h2>
+<ol><li>Математика</li><li>Русский язык</li>
+<li>Информатика</li></ol>
+</section>
+<section>
+<h2>Новости</h2>
+<p>В пятницу — экскурсия в планетарий. <strong>Не забудьте</strong> сменную обувь!</p>
+</section>
+</main>
+<FOOTER><p>7 «Б» класс</p></FOOTER>`
+  },
+
+  {
+    id: "assets",
+    title: "Стили и скрипты",
+    tagline: "Подключение CSS и JavaScript: link и script",
+    html: `
+      <div class="card">
+        <h3>Страница — это три разных языка</h3>
+        <p>Обычно сайт состоит из трёх частей, и каждая живёт в своём файле:</p>
+        <table class="tag-table">
+          <tr><td><b>HTML</b></td><td>структура и содержимое — файл <code class="inline">index.html</code></td></tr>
+          <tr><td><b>CSS</b></td><td>внешний вид (цвета, шрифты, отступы) — файл <code class="inline">style.css</code></td></tr>
+          <tr><td><b>JavaScript</b></td><td>поведение и интерактивность — файл <code class="inline">script.js</code></td></tr>
+        </table>
+        <p>HTML-файл подключает к себе два других специальными тегами.</p>
+      </div>
+      <div class="card">
+        <h3>Подключение стилей — тег &lt;link&gt;</h3>
+        <p>Одиночный тег <code class="inline">&lt;link&gt;</code> ставят внутри <code class="inline">&lt;head&gt;</code>. Он подключает внешний CSS-файл:</p>
+        <table class="tag-table">
+          <tr><td><code class="inline">rel="stylesheet"</code></td><td>тип связи — «таблица стилей»</td></tr>
+          <tr><td><code class="inline">href="style.css"</code></td><td>путь к файлу стилей</td></tr>
+        </table>
+        <p>В файле <code class="inline">index.html</code> это выглядит так:</p>
+        <pre class="code-block"><code>&lt;head&gt;
+  &lt;link rel="stylesheet" href="style.css"&gt;
+&lt;/head&gt;</code></pre>
+        <div class="note">
+          <span class="label">Правило</span>
+          <p>Все стили пишут <b>только в отдельном файле</b> <code class="inline">style.css</code>. Не вставляй оформление прямо в HTML — ни в атрибут <code class="inline">style="…"</code> у тегов, ни в <code class="inline">&lt;head&gt;</code>. Это дурной тон: структура и оформление перемешиваются, и такой код трудно читать и менять.</p>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Подключение скриптов — тег &lt;script&gt;</h3>
+        <p>Парный тег <code class="inline">&lt;script&gt;</code> подключает JavaScript. Его обычно ставят в самом низу, перед <code class="inline">&lt;/body&gt;</code> — чтобы скрипт запускался, когда страница уже загружена:</p>
+        <pre class="code-block"><code>&lt;body&gt;
+  ...содержимое...
+  &lt;script src="script.js"&gt;&lt;/script&gt;
+&lt;/body&gt;</code></pre>
+        <p>JavaScript тоже живёт в своём файле <code class="inline">script.js</code> — в HTML остаётся только строка подключения.</p>
+      </div>
+      <div class="card">
+        <h3>Три файла в редакторе</h3>
+        <p>Над редактором — вкладки <code class="inline">index.html</code>, <code class="inline">style.css</code> и <code class="inline">script.js</code>. Это три отдельных файла, как в настоящем проекте. Переключайся между ними и нажимай «Запустить».</p>
+        <div class="note">
+          <span class="label">Попробуй</span>
+          <p>Поменяй цвет кнопки в <code class="inline">style.css</code>. А потом удали в <code class="inline">index.html</code> строку с <code class="inline">&lt;link&gt;</code> — оформление пропадёт: страница больше не подключает файл стилей.</p>
+        </div>
+      </div>`,
+    code: `<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <title>Кнопка со скриптом</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <h2>Кнопка со скриптом</h2>
+    <button id="btn">Нажми меня</button>
+    <p id="out"></p>
+
+    <script src="script.js"><\/script>
+  </body>
+</html>`,
+    files: {
+      "style.css": `/* style.css — внешний вид страницы */
+
+button {
+  background: #58a6ff;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#out {
+  margin-top: 12px;
+  font-size: 20px;
+  color: #3fb950;
+}`,
+      "script.js": `// script.js — поведение страницы
+
+let count = 0;
+
+const button = document.getElementById('btn');
+const out = document.getElementById('out');
+
+button.addEventListener('click', function () {
+  count = count + 1;
+  out.textContent = 'Кнопку нажали ' + count + ' раз!';
+});`
+    }
+  },
+
+  {
+    id: "css-basics",
+    title: "Как устроен CSS",
+    tagline: "Правило, селектор, класс и id",
+    html: `
+      <div class="card">
+        <h3>Из чего состоит CSS-правило</h3>
+        <p>Файл <code class="inline">style.css</code> — это список <b>правил</b>. Каждое правило говорит браузеру: «вот этим элементам — вот такое оформление».</p>
+        <pre class="code-block"><code>p {
+  color: red;
+}</code></pre>
+        <table class="tag-table">
+          <tr><td><code class="inline">p</code></td><td><b>Селектор</b> — каким элементам применить оформление (здесь — всем абзацам).</td></tr>
+          <tr><td><code class="inline">{ … }</code></td><td>Фигурные скобки — внутри них перечисляют настройки.</td></tr>
+          <tr><td><code class="inline">color</code></td><td><b>Свойство</b> — что меняем (цвет текста).</td></tr>
+          <tr><td><code class="inline">red</code></td><td><b>Значение</b> — каким сделать (красным).</td></tr>
+          <tr><td><code class="inline">;</code></td><td>Точка с запятой — конец настройки. Ставь её после каждой строки.</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Три главных селектора</h3>
+        <table class="tag-table">
+          <tr><td><code class="inline">p</code></td><td><b>По тегу</b> — все элементы с этим тегом.</td></tr>
+          <tr><td><code class="inline">.warning</code></td><td><b>По классу</b> (с точкой) — все элементы, у которых в HTML написано <code class="inline">class="warning"</code>.</td></tr>
+          <tr><td><code class="inline">#title</code></td><td><b>По id</b> (с решёткой) — один-единственный элемент с <code class="inline">id="title"</code>.</td></tr>
+        </table>
+        <div class="note">
+          <span class="label">Классы</span>
+          <p>Чтобы оформить только некоторые элементы, дай им в HTML класс, а оформление опиши в <code class="inline">style.css</code>. Имя класса пишут латиницей, без пробелов. Чаще всего пользуются именно классами: один класс можно дать сколько угодно элементам.</p>
+        </div>
+        <div class="note">
+          <span class="label">Кто главнее</span>
+          <p>Если два правила задают одному элементу разный цвет, побеждает более точный селектор: id сильнее класса, класс сильнее тега. А при равенстве побеждает правило, которое написано ниже.</p>
+        </div>
+        <p>Попробуй дать <code class="inline">class="warning"</code> первому обычному абзацу и запусти.</p>
+      </div>`,
+    code: `<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <title>Селекторы</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <h1 id="title">Мой первый CSS</h1>
+    <p>Обычный абзац.</p>
+    <p class="warning">Абзац с классом warning.</p>
+    <p>Ещё один обычный абзац.</p>
+    <p class="warning">И снова warning.</p>
+  </body>
+</html>`,
+    files: {
+      "style.css": `/* Селектор по тегу: все абзацы */
+p {
+  color: #555555;
+}
+
+/* Селектор по классу: только элементы с class="warning" */
+.warning {
+  color: #ff3b2f;
+  font-weight: bold;
+}
+
+/* Селектор по id: один-единственный элемент */
+#title {
+  color: #00a39c;
+}`
+    }
+  },
+
+  {
+    id: "codestyle-css",
+    title: "Аккуратный CSS",
+    tagline: "Кодстайл: отступы, порядок и имена классов",
+    html: `
+      <div class="card">
+        <h3>Одно правило — одна «карточка»</h3>
+        <p>В CSS работают те же идеи, что и в HTML: отступы и переносы строк нужны людям, а не браузеру. Сравни два одинаковых правила:</p>
+        <p class="code-caption code-caption-bad">✕ Так плохо — всё слиплось в одну строку</p>
+        <pre class="code-block"><code>.news-card{border:2px solid #333333;padding:16px;border-radius:8px}</code></pre>
+        <p class="code-caption code-caption-good">✓ Так хорошо — каждое свойство видно сразу</p>
+        <pre class="code-block"><code>.news-card {
+  padding: 16px;
+  border: 2px solid #333333;
+  border-radius: 8px;
+}</code></pre>
+      </div>
+      <div class="card">
+        <h3>Правила аккуратного CSS</h3>
+        <table class="tag-table">
+          <tr><td><b>Скобки</b></td><td>Перед <code class="inline">{</code> — пробел. Закрывающая <code class="inline">}</code> — на отдельной строке, без отступа.</td></tr>
+          <tr><td><b>Свойства</b></td><td>Каждое — на своей строке, с отступом 2 пробела.</td></tr>
+          <tr><td><b>Двоеточие</b></td><td>После двоеточия — пробел: <code class="inline">color: red;</code>.</td></tr>
+          <tr><td><b>Точка с запятой</b></td><td>В конце каждого свойства, даже последнего: добавишь новое — ничего не сломается.</td></tr>
+          <tr><td><b>Пустая строка</b></td><td>Между правилами — одна пустая строка.</td></tr>
+          <tr><td><b>Несколько селекторов</b></td><td>Через запятую, каждый с новой строки.</td></tr>
+          <tr><td><b>Порядок</b></td><td>Правила идут в том же порядке, что и блоки на странице: шапка, основное, подвал. Так нужное правило легко найти.</td></tr>
+          <tr><td><b>Комментарии</b></td><td><code class="inline">/* Шапка */</code> — подписи к разделам файла.</td></tr>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Как называть классы</h3>
+        <table class="tag-table">
+          <tr><td><b>Латиница</b></td><td>Только английские буквы, маленькие: <code class="inline">.menu</code>.</td></tr>
+          <tr><td><b>Дефис</b></td><td>Слова разделяй дефисом: <code class="inline">.news-card</code>, <code class="inline">.main-menu</code>.</td></tr>
+          <tr><td><b>По смыслу</b></td><td>Называй класс по тому, <b>что это</b>, а не как оно выглядит: <code class="inline">.warning</code>, а не <code class="inline">.red-text</code>. Цвет завтра поменяется, а предупреждение останется предупреждением.</td></tr>
+          <tr><td><b>Без номеров</b></td><td><code class="inline">.block1</code>, <code class="inline">.div2</code> ничего не говорят. Через неделю никто не вспомнит, что это.</td></tr>
+        </table>
+        <div class="note">
+          <span class="label">Регистр важен</span>
+          <p>В именах классов большие и маленькие буквы — разные: <code class="inline">.Menu</code> и <code class="inline">.menu</code> — это два разных класса. Поэтому имена всегда пишут маленькими буквами.</p>
+        </div>
+        <p>Во вкладке <code class="inline">style.css</code> — неаккуратный файл. Расставь отступы и пустые строки, разложи правила в порядке страницы. А ещё одно правило не работает — найди, почему, и исправь.</p>
+      </div>`,
+    code: `<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <title>Аккуратный CSS</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <h1>Новости класса</h1>
+
+    <nav class="menu">
+      <a href="https://example.com" target="_blank">Расписание</a>
+      <a href="https://example.com" target="_blank">Новости</a>
+    </nav>
+
+    <article class="news-card">
+      <h2>Экскурсия</h2>
+      <p>В пятницу едем в планетарий.</p>
+    </article>
+  </body>
+</html>`,
+    files: {
+      "style.css": `.news-card{border:2px solid #333333;padding:16px;border-radius:8px}
+h1{color:#ff3b2f;text-transform:uppercase}
+.MENU a{margin-right:12px;text-decoration:none;font-weight:bold}
+
+
+
+.news-card h2 {
+color: #00a39c;
+    font-size: 20px;}`
+    }
+  },
+
+  {
+    id: "css-color",
+    title: "Цвет и фон",
+    tagline: "color, background-color и картинки на фоне",
+    html: `
+      <div class="card">
+        <h3>Цвет текста и цвет фона</h3>
+        <table class="tag-table">
+          <tr><td><code class="inline">color</code></td><td>Цвет текста.</td></tr>
+          <tr><td><code class="inline">background-color</code></td><td>Цвет фона элемента.</td></tr>
+        </table>
+        <div class="note">
+          <span class="label">Читаемость</span>
+          <p>Текст должен хорошо читаться: тёмный текст на светлом фоне или светлый на тёмном. Жёлтый текст на белом фоне почти не виден.</p>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Как записать цвет</h3>
+        <table class="tag-table">
+          <tr><td><code class="inline">red</code></td><td><b>Словом</b> на английском: <code class="inline">red</code>, <code class="inline">white</code>, <code class="inline">black</code>, <code class="inline">orange</code>. Просто, но оттенков мало.</td></tr>
+          <tr><td><code class="inline">#ff3b2f</code></td><td><b>Кодом</b>: решётка и шесть символов. Первая пара отвечает за красный, вторая — за зелёный, третья — за синий. Так цвета записывают чаще всего.</td></tr>
+          <tr><td><code class="inline">rgb(255, 59, 47)</code></td><td><b>Тремя числами</b> от 0 до 255 — сколько красного, зелёного и синего. Это тот же цвет, что и <code class="inline">#ff3b2f</code>.</td></tr>
+        </table>
+        <div class="note">
+          <span class="label">Подсказка</span>
+          <p>Код любого цвета можно найти в палитре графического редактора или в поисковике по запросу «выбор цвета».</p>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Картинка на фоне</h3>
+        <p>Фоном может быть не только цвет, но и картинка. Её подключают в <code class="inline">style.css</code>, а не в HTML:</p>
+        <table class="tag-table">
+          <tr><td><code class="inline">background-image: url("stars.svg")</code></td><td>Какую картинку взять: путь к файлу в кавычках внутри <code class="inline">url()</code>.</td></tr>
+          <tr><td><code class="inline">background-repeat</code></td><td><code class="inline">repeat</code> — повторять плиткой (так по умолчанию), <code class="inline">no-repeat</code> — показать один раз.</td></tr>
+          <tr><td><code class="inline">background-size</code></td><td><code class="inline">cover</code> — растянуть на весь блок, <code class="inline">contain</code> — вписать целиком.</td></tr>
+          <tr><td><code class="inline">background-position</code></td><td>Где расположить: <code class="inline">center</code>, <code class="inline">top</code>, <code class="inline">bottom</code>.</td></tr>
+        </table>
+        <div class="note">
+          <span class="label">Фон или img</span>
+          <p>Если картинка — часть содержания (фото в статье), используй <code class="inline">&lt;img&gt;</code> с <code class="inline">alt</code>. Если это украшение (узор, небо за заголовком) — ставь её фоном через CSS.</p>
+        </div>
+        <p>Картинки <code class="inline">mountains.svg</code> и <code class="inline">stars.svg</code> уже лежат в папке проекта — их видно под редактором. Попробуй поменять у блока <code class="inline">.night</code> значение <code class="inline">repeat</code> на <code class="inline">no-repeat</code>.</p>
+      </div>`,
+    code: `<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <title>Цвет и фон</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <h1>Цвет и фон</h1>
+    <p class="marker">У этого абзаца цветной фон.</p>
+
+    <section class="day">
+      <h2>Днём</h2>
+    </section>
+
+    <section class="night">
+      <h2>Ночью</h2>
+    </section>
+  </body>
+</html>`,
+    files: {
+      "style.css": `/* Цвет текста */
+h1 {
+  color: #ff3b2f;
+}
+
+/* Цвет текста и цвет фона */
+.marker {
+  color: white;
+  background-color: rgb(0, 163, 156);
+}
+
+/* Одна большая картинка на весь блок */
+.day {
+  height: 160px;
+  background-image: url("mountains.svg");
+  background-size: cover;
+  background-position: center;
+}
+
+/* Маленькая картинка, повторённая плиткой */
+.night {
+  height: 120px;
+  color: white;
+  background-color: #1d2b53;
+  background-image: url("stars.svg");
+  background-repeat: repeat;
+}`
+    },
+    assets: {
+      "mountains.svg": ASSETS["mountains.svg"],
+      "stars.svg": ASSETS["stars.svg"]
+    }
+  },
+
+  {
+    id: "css-text",
+    title: "Оформление текста",
+    tagline: "Шрифт, размер, начертание, выравнивание",
+    html: `
+      <div class="card">
+        <h3>Свойства для текста</h3>
+        <table class="tag-table">
+          <tr><td><code class="inline">font-family</code></td><td>Шрифт. Через запятую перечисляют запасные: если первого нет на компьютере, браузер возьмёт следующий. В конце пишут общий тип: <code class="inline">sans-serif</code> (без засечек), <code class="inline">serif</code> (с засечками), <code class="inline">monospace</code> (все буквы одной ширины).</td></tr>
+          <tr><td><code class="inline">font-size</code></td><td>Размер букв, например <code class="inline">20px</code>.</td></tr>
+          <tr><td><code class="inline">font-weight</code></td><td>Толщина: <code class="inline">normal</code> или <code class="inline">bold</code> (жирный).</td></tr>
+          <tr><td><code class="inline">text-align</code></td><td>Выравнивание: <code class="inline">left</code>, <code class="inline">center</code>, <code class="inline">right</code>.</td></tr>
+          <tr><td><code class="inline">line-height</code></td><td>Расстояние между строками. <code class="inline">1.5</code> — в полтора раза больше размера букв, так длинный текст читать легче.</td></tr>
+          <tr><td><code class="inline">text-decoration</code></td><td>Линия под текстом. <code class="inline">none</code> убирает подчёркивание у ссылки.</td></tr>
+          <tr><td><code class="inline">text-transform</code></td><td><code class="inline">uppercase</code> — все буквы заглавные (в HTML текст при этом остаётся обычным).</td></tr>
+        </table>
+        <div class="note">
+          <span class="label">Где писать</span>
+          <p>Шрифт удобно задать один раз для <code class="inline">body</code> — его унаследуют все элементы внутри страницы.</p>
+        </div>
+      </div>`,
+    code: `<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <title>Текст</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <h1>Заголовок по центру</h1>
+
+    <p class="lead">Крупный вводный абзац. У него увеличено
+      расстояние между строками, поэтому длинный текст
+      читать легко и приятно.</p>
+
+    <p class="code">Моноширинный текст, как в редакторе кода.</p>
+
+    <a href="https://example.com" target="_blank">Ссылка без подчёркивания</a>
+  </body>
+</html>`,
+    files: {
+      "style.css": `/* Шрифт для всей страницы */
+body {
+  font-family: Arial, sans-serif;
+}
+
+h1 {
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.lead {
+  font-size: 20px;
+  line-height: 1.6;
+}
+
+.code {
+  font-family: monospace;
+}
+
+a {
+  font-weight: bold;
+  text-decoration: none;
+}`
+    }
+  },
+
+  {
+    id: "css-box",
+    title: "Размеры, отступы и рамки",
+    tagline: "Блочная модель: width, padding, border, margin",
+    html: `
+      <div class="card">
+        <h3>Каждый элемент — коробка</h3>
+        <p>Браузер рисует любой элемент как прямоугольник из четырёх слоёв — от содержимого наружу:</p>
+        <div class="box-model">
+          <div class="bm-margin"><span class="bm-label">margin — внешний отступ</span>
+            <div class="bm-border"><span class="bm-label bm-label-dark">border — рамка</span>
+              <div class="bm-padding"><span class="bm-label">padding — внутренний отступ</span>
+                <div class="bm-content">content — содержимое</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <table class="tag-table">
+          <tr><td><code class="inline">width</code>, <code class="inline">height</code></td><td>Ширина и высота содержимого.</td></tr>
+          <tr><td><code class="inline">padding</code></td><td>Внутренний отступ — от содержимого до рамки. Фон элемента заливает и его.</td></tr>
+          <tr><td><code class="inline">border</code></td><td>Рамка вокруг элемента.</td></tr>
+          <tr><td><code class="inline">margin</code></td><td>Внешний отступ — расстояние до соседних элементов. Он всегда прозрачный.</td></tr>
+        </table>
+        <div class="note">
+          <span class="label">Сокращения</span>
+          <p><code class="inline">padding: 10px</code> — со всех четырёх сторон. <code class="inline">padding: 10px 20px</code> — 10px сверху и снизу, 20px слева и справа. Отдельную сторону задают так: <code class="inline">padding-left</code>, <code class="inline">margin-top</code>. С <code class="inline">margin</code> всё работает так же.</p>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Рамки</h3>
+        <p>Рамку записывают тремя словами: <b>толщина, стиль, цвет</b>.</p>
+        <pre class="code-block"><code>border: 2px solid #333333;</code></pre>
+        <table class="tag-table">
+          <tr><td><code class="inline">solid</code></td><td>сплошная линия</td></tr>
+          <tr><td><code class="inline">dashed</code></td><td>штрихи</td></tr>
+          <tr><td><code class="inline">dotted</code></td><td>точки</td></tr>
+          <tr><td><code class="inline">double</code></td><td>двойная линия</td></tr>
+          <tr><td><code class="inline">border-left</code></td><td>рамка только с одной стороны (есть ещё <code class="inline">-top</code>, <code class="inline">-right</code>, <code class="inline">-bottom</code>)</td></tr>
+          <tr><td><code class="inline">border-radius</code></td><td>скругление углов. <code class="inline">50%</code> у квадрата делает круг.</td></tr>
+        </table>
+        <div class="note">
+          <span class="label">Два класса</span>
+          <p>Элементу можно дать несколько классов через пробел: <code class="inline">class="card dashed"</code>. Он получит оформление обоих.</p>
+        </div>
+      </div>`,
+    code: `<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <title>Рамки и отступы</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <section class="card">
+      <h2>Карточка</h2>
+      <p>У этой карточки есть рамка, внутренние и внешние отступы.</p>
+    </section>
+
+    <section class="card dashed">
+      <h2>Ещё карточка</h2>
+      <p>Тот же класс card плюс класс dashed.</p>
+    </section>
+
+    <p class="quote">Цитата с полосой слева.</p>
+
+    <p class="circle">OK</p>
+  </body>
+</html>`,
+    files: {
+      "style.css": `.card {
+  width: 260px;
+  padding: 16px;
+  margin: 16px;
+  border: 2px solid #333333;
+  border-radius: 10px;
+}
+
+/* Меняет у карточки только стиль и цвет рамки */
+.dashed {
+  border-style: dashed;
+  border-color: #00a39c;
+}
+
+.quote {
+  padding-left: 12px;
+  border-left: 6px solid #ff3b2f;
+}
+
+.circle {
+  width: 80px;
+  height: 80px;
+  border: 3px dotted #ff3b2f;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 80px;
+}`
+    }
+  },
+
+  {
+    id: "css-display",
+    title: "Блочные и строчные элементы",
+    tagline: "Свойство display",
+    html: `
+      <div class="card">
+        <h3>Два вида элементов</h3>
+        <table class="tag-table">
+          <tr><td><b>Блочные</b></td><td><code class="inline">p</code>, <code class="inline">h1</code>, <code class="inline">ul</code>, <code class="inline">li</code>, <code class="inline">section</code>, <code class="inline">header</code> — начинаются с новой строки и занимают всю ширину. Им можно задать <code class="inline">width</code> и <code class="inline">height</code>.</td></tr>
+          <tr><td><b>Строчные</b></td><td><code class="inline">a</code>, <code class="inline">strong</code>, <code class="inline">em</code> — стоят внутри строки, как слова в предложении. Ширина и высота на них не действуют.</td></tr>
+        </table>
+        <p>Свойство <code class="inline">display</code> меняет вид элемента:</p>
+        <table class="tag-table">
+          <tr><td><code class="inline">display: block</code></td><td>сделать блочным</td></tr>
+          <tr><td><code class="inline">display: inline</code></td><td>сделать строчным</td></tr>
+          <tr><td><code class="inline">display: inline-block</code></td><td>стоит в строке, но слушается размеров и отступов — удобно для кнопок меню</td></tr>
+          <tr><td><code class="inline">display: none</code></td><td>спрятать элемент: в HTML он есть, а на странице его нет</td></tr>
+        </table>
+        <div class="note">
+          <span class="label">Попробуй</span>
+          <p>Удали в <code class="inline">style.css</code> правило для <code class="inline">.secret</code> — спрятанный абзац появится. А выстраивать элементы в ряд ещё удобнее с помощью flexbox — о нём следующий урок.</p>
+        </div>
+      </div>`,
+    code: `<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <title>Display</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <p>Абзац — блочный элемент.</p>
+    <p>Этот абзац тоже начинается с новой строки.</p>
+
+    <nav class="menu">
+      <a href="https://example.com" target="_blank">Главная</a>
+      <a href="https://example.com" target="_blank">Статьи</a>
+      <a href="https://example.com" target="_blank">Контакты</a>
+    </nav>
+
+    <ul class="row">
+      <li>Один</li>
+      <li>Два</li>
+      <li>Три</li>
+    </ul>
+
+    <p class="secret">Этот абзац спрятан с помощью display: none.</p>
+  </body>
+</html>`,
+    files: {
+      "style.css": `/* Ссылки строчные. inline-block оставляет их в ряд,
+   но позволяет задать отступы и рамку, как у кнопки. */
+.menu a {
+  display: inline-block;
+  padding: 8px 14px;
+  border: 2px solid #333333;
+  text-decoration: none;
+}
+
+/* Пункты списка блочные. Делаем их строчными,
+   чтобы они встали в одну строку. */
+.row li {
+  display: inline;
+  margin-right: 12px;
+}
+
+/* Элемент есть в HTML, но на странице его не видно */
+.secret {
+  display: none;
+}`
+    }
+  },
+
+  {
+    id: "css-flex",
+    title: "Flexbox",
+    tagline: "display: flex — выстраиваем элементы в ряд",
+    html: `
+      <div class="card">
+        <h3>Родитель и дети</h3>
+        <p>Flexbox работает с двумя уровнями: <b>контейнер</b> (родитель) и <b>элементы</b> внутри него (дети). Пишешь контейнеру <code class="inline">display: flex</code> — и все его дети встают в ряд.</p>
+        <table class="tag-table">
+          <tr><td><code class="inline">flex-direction</code></td><td>Направление: <code class="inline">row</code> — в строку (по умолчанию), <code class="inline">column</code> — в столбик.</td></tr>
+          <tr><td><code class="inline">justify-content</code></td><td>Как разложить элементы <b>вдоль</b> направления: <code class="inline">flex-start</code> (к началу), <code class="inline">center</code>, <code class="inline">flex-end</code> (к концу), <code class="inline">space-between</code> (по краям, промежутки поровну), <code class="inline">space-around</code> (промежутки и по краям).</td></tr>
+          <tr><td><code class="inline">align-items</code></td><td>Как выровнять <b>поперёк</b> направления: <code class="inline">stretch</code> (растянуть, по умолчанию), <code class="inline">flex-start</code>, <code class="inline">center</code>, <code class="inline">flex-end</code>.</td></tr>
+          <tr><td><code class="inline">gap</code></td><td>Промежуток между элементами, например <code class="inline">16px</code>.</td></tr>
+          <tr><td><code class="inline">flex-wrap: wrap</code></td><td>Переносить элементы на новую строку, если они не помещаются.</td></tr>
+        </table>
+        <div class="note">
+          <span class="label">Вдоль и поперёк</span>
+          <p>При <code class="inline">row</code> элементы идут слева направо: <code class="inline">justify-content</code> двигает их по горизонтали, <code class="inline">align-items</code> — по вертикали. При <code class="inline">column</code> всё наоборот.</p>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Пульт управления flexbox</h3>
+        <p>Нажимай кнопки — блоки перестроятся, а ниже появится CSS, который это делает.</p>
+        <div class="flex-demo" id="flexDemo">
+          <div class="fd-item">1</div>
+          <div class="fd-item">2</div>
+          <div class="fd-item">3</div>
+        </div>
+        <div class="fd-controls">
+          <div class="fd-group" data-prop="flex-direction">
+            <span class="fd-label">flex-direction</span>
+            <button type="button" data-value="row" class="active">row</button>
+            <button type="button" data-value="column">column</button>
+          </div>
+          <div class="fd-group" data-prop="justify-content">
+            <span class="fd-label">justify-content</span>
+            <button type="button" data-value="flex-start" class="active">flex-start</button>
+            <button type="button" data-value="center">center</button>
+            <button type="button" data-value="flex-end">flex-end</button>
+            <button type="button" data-value="space-between">space-between</button>
+            <button type="button" data-value="space-around">space-around</button>
+          </div>
+          <div class="fd-group" data-prop="align-items">
+            <span class="fd-label">align-items</span>
+            <button type="button" data-value="stretch" class="active">stretch</button>
+            <button type="button" data-value="flex-start">flex-start</button>
+            <button type="button" data-value="center">center</button>
+            <button type="button" data-value="flex-end">flex-end</button>
+          </div>
+        </div>
+        <pre class="code-block"><code id="flexCode"></code></pre>
+      </div>
+      <div class="card">
+        <h3>Flexbox в настоящей странице</h3>
+        <p>В примере два частых случая: шапка, где логотип слева, а меню справа (<code class="inline">space-between</code>), и ряд карточек, которые переносятся на новую строку (<code class="inline">flex-wrap</code>). Попробуй поменять <code class="inline">justify-content</code> у шапки на <code class="inline">center</code>.</p>
+      </div>`,
+    onMount: () => setupFlexDemo(),
+    code: `<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <title>Flexbox</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <header class="top">
+      <strong>ЛОГОТИП</strong>
+      <nav class="menu">
+        <a href="https://example.com" target="_blank">Главная</a>
+        <a href="https://example.com" target="_blank">Статьи</a>
+        <a href="https://example.com" target="_blank">Контакты</a>
+      </nav>
+    </header>
+
+    <section class="cards">
+      <article class="card">Карточка 1</article>
+      <article class="card">Карточка 2</article>
+      <article class="card">Карточка 3</article>
+      <article class="card">Карточка 4</article>
+    </section>
+  </body>
+</html>`,
+    files: {
+      "style.css": `/* Шапка: логотип слева, меню справа, по вертикали — по центру */
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background-color: #eef3fb;
+}
+
+/* Ссылки меню в ряд с промежутком */
+.menu {
+  display: flex;
+  gap: 16px;
+}
+
+/* Ряд карточек: переносятся, если не помещаются */
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.card {
+  width: 140px;
+  padding: 16px;
+  border: 2px solid #333333;
+  border-radius: 8px;
+}`
+    }
+  },
+
+  {
+    id: "final",
+    title: "Собираем страницу",
+    tagline: "Всё вместе: готовая страница «Обо мне»",
+    html: `
+      <div class="card">
+        <h3>Соберём всё изученное в одну страницу</h3>
+        <p>В примере — законченная страница «Обо мне». В <code class="inline">index.html</code> — структура: семантические теги, заголовки, список, ссылки и картинка. В <code class="inline">style.css</code> — всё оформление: классы, цвета и фон-картинка, рамки и отступы, flexbox для шапки и карточек.</p>
+        <p>Это рабочий шаблон. Меняй текст, цвета и рамки, добавляй карточки — и получится твоя собственная страница.</p>
+        <div class="note">
+          <span class="label">Итог</span>
+          <p>Ты разобрал основы вёрстки: структуру HTML, текст, списки, ссылки, изображения, семантику, подключение файлов и главные свойства CSS. Этого достаточно, чтобы собрать простой сайт с нуля.</p>
+        </div>
+      </div>`,
+    code: `<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <title>Обо мне</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <header class="top">
+      <h1>Привет, я Саша</h1>
+      <nav class="menu">
+        <a href="#me">Обо мне</a>
+        <a href="#hobby">Увлечения</a>
+      </nav>
+    </header>
+
+    <main class="cards">
+      <article class="card" id="me">
+        <h2>Кто я</h2>
+        <img src="photo.svg" alt="Фото">
+        <p>Мне <strong>13 лет</strong>, я учусь верстать сайты.</p>
+      </article>
+
+      <article class="card" id="hobby">
+        <h2>Увлечения</h2>
+        <ul>
+          <li>Рисование</li>
+          <li>Футбол</li>
+          <li>Программирование</li>
+        </ul>
+        <p>Полезный сайт:
+          <a href="https://example.com" target="_blank">Пример сайта</a>
+        </p>
+      </article>
+    </main>
+
+    <footer class="bottom">
+      <p>© 2026 — моя первая страница</p>
+    </footer>
+  </body>
+</html>`,
+    files: {
+      "style.css": `/* style.css — оформление страницы «Обо мне» */
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: #222222;
+  background-color: #f4f1ea;
+}
+
+/* Шапка: имя слева, меню справа, звёздный фон */
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  color: white;
+  background-color: #1d2b53;
+  background-image: url("stars.svg");
+}
+
+.menu {
+  display: flex;
+  gap: 16px;
+}
+
+.menu a {
+  color: #ffd54f;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+/* Карточки в ряд, переносятся на узком экране */
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 24px;
+}
+
+.card {
+  width: 240px;
+  padding: 16px;
+  background-color: white;
+  border: 2px solid #222222;
+  border-radius: 10px;
+}
+
+.card img {
+  width: 200px;
+}
+
+.bottom {
+  padding: 12px 24px;
+  text-align: center;
+  border-top: 4px solid #ff3b2f;
+}`
+    },
+    assets: {
+      "photo.svg": ASSETS["photo.svg"],
+      "stars.svg": ASSETS["stars.svg"]
+    }
+  }
+];
+
+/* ============================================================
+   ЛОГИКА ПРИЛОЖЕНИЯ
+   ============================================================ */
+
+/* Короткий помощник: элемент по id. */
+const $ = (id) => document.getElementById(id);
+
+/* Индекс открытого урока. Меняется только через goTo(),
+   которая удерживает его в границах списка. */
+let currentIndex = 0;
+
+/* --- Боковое меню ---------------------------------------- */
+
+/* Строим список уроков ОДИН раз при запуске: сами кнопки не меняются,
+   меняется только их подсветка (см. setActiveButton). */
+function buildSidebar() {
+  const nav = $("lessonList");
+  LESSONS.forEach((lesson, i) => {
+    const btn = document.createElement("button");
+    btn.className = "lesson-btn";
+    btn.dataset.index = i;
+    btn.innerHTML = `<span class="num">${i + 1}</span><span>${lesson.title}</span>`;
+    btn.addEventListener("click", () => goTo(i));
+    nav.appendChild(btn);
+  });
+}
+
+/* Подсвечиваем кнопку текущего урока, снимая подсветку с остальных. */
+function setActiveButton(index) {
+  document.querySelectorAll(".lesson-btn").forEach((btn) => {
+    btn.classList.toggle("active", Number(btn.dataset.index) === index);
+  });
+}
+
+/* --- Отрисовка урока ------------------------------------- */
+
+/* Собираем разметку урока: теория + песочница + кнопки навигации.
+   Возвращаем строку, которую вставляем в контейнер за один раз. */
+function buildLessonMarkup(lesson, index) {
+  const isFirst = index === 0;
+  const isLast = index === LESSONS.length - 1;
+  const fileNames = Object.keys(lessonFiles(lesson));
+  // Один файл — просто подпись; несколько — вкладки для переключения.
+  const fileLabels = fileNames.length > 1
+    ? fileNames.map((name, i) =>
+        `<button type="button" class="file-tab${i === 0 ? " active" : ""}" data-file="${name}">${name}</button>`
+      ).join("")
+    : `<span class="file-name">${fileNames[0]}</span>`;
+  // Картинки из «папки проекта» показываем миниатюрами под редактором.
+  const assets = Object.entries(lesson.assets || {});
+  const assetStrip = assets.length
+    ? `<div class="asset-strip"><span class="asset-label">// Картинки в папке проекта</span>${
+        assets.map(([name, svg]) =>
+          `<figure class="asset"><img src="${svgDataUri(svg)}" alt="${name}"><figcaption>${name}</figcaption></figure>`
+        ).join("")}</div>`
+    : "";
+  return `
+    <div class="lesson-head">
+      <h2>${lesson.title}</h2>
+      <p class="tagline">Урок ${index + 1} из ${LESSONS.length} · ${lesson.tagline}</p>
+    </div>
+    ${lesson.html}
+    <div class="card">
+      <h3>Редактор кода</h3>
+      <p>Меняй код слева и нажимай «Запустить» — результат появится справа.</p>
+    </div>
+    <div class="sandbox">
+      <div class="editor-pane">
+        <div class="pane-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="file-tabs">${fileLabels}</span></div>
+        <textarea class="editor" id="editor" spellcheck="false"></textarea>
+      </div>
+      <div class="preview-pane">
+        <div class="pane-bar">Результат</div>
+        <iframe id="preview" title="Результат"></iframe>
+      </div>
+      ${assetStrip}
+      <div class="sandbox-toolbar">
+        <button class="btn btn-run" id="runBtn">Запустить</button>
+        <button class="btn btn-ghost" id="resetBtn">Сбросить</button>
+        <span class="hint">Ctrl + Enter — запуск</span>
+      </div>
+    </div>
+    <div class="lesson-nav">
+      <button class="btn btn-ghost" id="prevBtn" ${isFirst ? "disabled" : ""}>← Назад</button>
+      <button class="btn btn-run" id="nextBtn" ${isLast ? "disabled" : ""}>Дальше →</button>
+    </div>
+  `;
+}
+
+/* Подключаем песочницу: кладём в редактор пример урока и вешаем обработчики.
+   Поле и кнопки создаются заново при каждой отрисовке урока, поэтому и
+   обработчики вешаем заново — старые уходят вместе со старыми узлами. */
+function setupSandbox(lesson) {
+  const editor = $("editor");
+  const original = lessonFiles(lesson);
+  let files = { ...original };     // правки ученика по каждому файлу
+  let activeFile = "index.html";
+  editor.value = files[activeFile];
+
+  // Правки сохраняем сразу, чтобы они не терялись при переключении вкладок.
+  editor.addEventListener("input", () => { files[activeFile] = editor.value; });
+
+  const showFile = (name) => {
+    activeFile = name;
+    editor.value = files[name];
+    document.querySelectorAll(".file-tab").forEach((tab) => {
+      tab.classList.toggle("active", tab.dataset.file === name);
+    });
+  };
+  document.querySelectorAll(".file-tab").forEach((tab) => {
+    tab.addEventListener("click", () => showFile(tab.dataset.file));
+  });
+
+  const run = () => runCode(buildDocument(files, lesson.previewCss, lesson.assets));
+  $("runBtn").addEventListener("click", run);
+  $("resetBtn").addEventListener("click", () => {
+    files = { ...original };      // вернуть исходные примеры всех файлов урока
+    editor.value = files[activeFile];
+    run();
+  });
+
+  editor.addEventListener("keydown", (e) => {
+    // Ctrl/Cmd + Enter — быстрый запуск без вставки перевода строки.
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      e.preventDefault();
+      run();
+      return;
+    }
+    const start = editor.selectionStart;
+    const lineStart = editor.value.lastIndexOf("\n", start - 1) + 1;
+
+    // Shift+Tab убирает до двух пробелов в начале текущей строки.
+    if (e.key === "Tab" && e.shiftKey) {
+      e.preventDefault();
+      const removable = editor.value.slice(lineStart, lineStart + 2).match(/^ {1,2}/);
+      if (!removable) return;
+      const n = removable[0].length;
+      editor.setSelectionRange(lineStart, lineStart + n);
+      insertText(editor, "");
+      const caret = Math.max(lineStart, start - n);
+      editor.setSelectionRange(caret, caret);
+      return;
+    }
+    // Tab вставляет два пробела, а не уводит фокус с поля.
+    if (e.key === "Tab") {
+      e.preventDefault();
+      insertText(editor, "  ");
+      return;
+    }
+    // Enter переносит строку с тем же отступом, что у текущей, —
+    // так проще держать «лесенку» вложенности.
+    if (e.key === "Enter" && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      const indent = editor.value.slice(lineStart).match(/^ */)[0];
+      insertText(editor, "\n" + indent);
+    }
+  });
+
+  run();   // сразу показываем результат примера
+}
+
+/* Подключаем кнопки «Назад» / «Дальше» текущего урока. */
+function setupLessonNav(index) {
+  $("prevBtn").addEventListener("click", () => goTo(index - 1));
+  $("nextBtn").addEventListener("click", () => goTo(index + 1));
+}
+
+/* Открыть урок по индексу — единственная точка смены урока.
+   Здесь же держим индекс в границах списка. */
+function goTo(index) {
+  if (index < 0 || index >= LESSONS.length) return;   // вне диапазона — игнорируем
+  currentIndex = index;
+
+  const lesson = LESSONS[index];
+  $("content").innerHTML = buildLessonMarkup(lesson, index);
+
+  setupSandbox(lesson);
+  setupLessonNav(index);
+  setActiveButton(index);
+  if (lesson.onMount) lesson.onMount();   // интерактив внутри теории (демка flexbox)
+
+  document.querySelector("main.content").scrollTop = 0;   // новый урок — к началу
+}
+
+/* --- Песочница ------------------------------------------- */
+
+/* Вставка текста в поле на место выделения. execCommand сохраняет
+   историю правок, поэтому Ctrl+Z продолжает работать; если браузер
+   его не поддерживает — вставляем напрямую (без истории). Событие input
+   нужно, чтобы правка попала в файл активной вкладки. */
+function insertText(field, text) {
+  field.focus();
+  let ok = false;
+  try { ok = document.execCommand("insertText", false, text); } catch (e) { ok = false; }
+  if (!ok) {
+    field.setRangeText(text, field.selectionStart, field.selectionEnd, "end");
+    field.dispatchEvent(new Event("input"));
+  }
+}
+
+/* SVG-текст → data:-адрес. Кроме обычного кодирования экранируем
+   кавычку и скобки, чтобы адрес не ломал url("…") в CSS. */
+function svgDataUri(svg) {
+  return "data:image/svg+xml," + encodeURIComponent(svg)
+    .replace(/'/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29");
+}
+
+/* Пульт flexbox в уроке «Flexbox». Значения храним в data-атрибутах
+   контейнера, а раскладку делают CSS-правила .flex-demo[data-…] —
+   так демка сама не пользуется атрибутом style. */
+function setupFlexDemo() {
+  const demo = $("flexDemo");
+  const codeEl = $("flexCode");
+  if (!demo || !codeEl) return;
+
+  const state = { "flex-direction": "row", "justify-content": "flex-start", "align-items": "stretch" };
+  const render = () => {
+    Object.entries(state).forEach(([prop, value]) => demo.setAttribute("data-" + prop, value));
+    codeEl.textContent = ".container {\n  display: flex;\n" +
+      Object.entries(state).map(([prop, value]) => `  ${prop}: ${value};`).join("\n") + "\n}";
+  };
+
+  document.querySelectorAll(".fd-group").forEach((group) => {
+    group.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-value]");
+      if (!btn) return;
+      state[group.dataset.prop] = btn.dataset.value;
+      group.querySelectorAll("button").forEach((b) => b.classList.toggle("active", b === btn));
+      render();
+    });
+  });
+  render();
+}
+
+/* Все файлы урока: index.html (lesson.code) + дополнительные (lesson.files). */
+function lessonFiles(lesson) {
+  return { "index.html": lesson.code, ...(lesson.files || {}) };
+}
+
+/* Собираем одну страницу для окна результата. В песочнице нет настоящих
+   файлов, поэтому <link href="style.css"> и <script src="script.js"> заменяем
+   содержимым соответствующих вкладок. Подставляем только то, что реально
+   подключено: удалил <link> — стили пропали, как и в настоящем проекте. */
+function buildDocument(files, previewCss, assets) {
+  let html = files["index.html"];
+
+  html = html.replace(/<link\b[^>]*>/gi, (tag) => {
+    const href = (tag.match(/\bhref\s*=\s*["']([^"']+)["']/i) || [])[1];
+    const isStylesheet = /\brel\s*=\s*["']?stylesheet/i.test(tag);
+    return isStylesheet && href in files ? `<style>${files[href]}</style>` : tag;
+  });
+
+  html = html.replace(/<script\b[^>]*\bsrc\s*=\s*["']([^"']+)["'][^>]*>\s*<\/script>/gi,
+    (tag, src) => (src in files ? `<script>${files[src]}<\/script>` : tag));
+
+  // Картинки проекта: url("stars.svg") в CSS и src="photo.svg" в HTML
+  // заменяем встроенными файлами. Неизвестные имена не трогаем.
+  Object.entries(assets || {}).forEach(([name, svg]) => {
+    const uri = svgDataUri(svg);
+    const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    html = html
+      .replace(new RegExp(`url\\(\\s*["']?${escaped}["']?\\s*\\)`, "g"), () => `url("${uri}")`)
+      .replace(new RegExp(`(\\bsrc\\s*=\\s*)["']${escaped}["']`, "g"), (m, attr) => `${attr}"${uri}"`);
+  });
+
+  // Служебные стили учебника (например, рамки в уроке про структуру):
+  // кладём в <head>, если он есть, иначе в начало фрагмента.
+  if (previewCss) {
+    const helper = `<style>${previewCss}</style>`;
+    html = /<\/head>/i.test(html)
+      ? html.replace(/<\/head>/i, () => helper + "</head>")
+      : helper + html;
+  }
+  return html;
+}
+
+/* Запуск кода пользователя в изолированном iframe.
+   allow-scripts без allow-same-origin: JS выполняется, но не имеет
+   доступа к странице учебника. Грузим через data:-URL (а не srcdoc),
+   чтобы якорные ссылки (#id) прокручивали сам пример,
+   а не адрес файла учебника. */
+function runCode(code) {
+  const frame = $("preview");
+  frame.removeAttribute("srcdoc");
+  frame.setAttribute("sandbox", "allow-scripts allow-popups allow-popups-to-escape-sandbox");
+  frame.src = "data:text/html;charset=utf-8," + encodeURIComponent(code);
+}
+
+/* --- Тема: светлая / тёмная ------------------------------ */
+
+const THEME_KEY = "html_course_theme";
+
+/* Применяем тему к документу и обновляем подпись кнопки.
+   Подпись показывает, КУДА переключит клик (не текущее состояние). */
+function applyTheme(theme) {
+  const root = document.documentElement;
+  if (theme === "dark") {
+    root.setAttribute("data-theme", "dark");
+  } else {
+    root.removeAttribute("data-theme");   // светлая — состояние по умолчанию
+  }
+  const btn = $("themeToggle");
+  if (btn) btn.textContent = theme === "dark" ? "☀ СВЕТ" : "☾ ТЬМА";
+}
+
+/* Сохранённая тема; по умолчанию светлая. */
+function loadTheme() {
+  try {
+    return localStorage.getItem(THEME_KEY) === "dark" ? "dark" : "light";
+  } catch (e) {
+    return "light";   // приватный режим / доступ закрыт — не падаем
+  }
+}
+
+/* Подключаем кнопку переключения темы. */
+function setupTheme() {
+  let theme = loadTheme();
+  applyTheme(theme);
+
+  const btn = $("themeToggle");
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    theme = theme === "dark" ? "light" : "dark";
+    applyTheme(theme);
+    try { localStorage.setItem(THEME_KEY, theme); } catch (e) { /* без сохранения */ }
+  });
+}
+
+/* --- Запуск --------------------------------------------- */
+
+function init() {
+  // Защита от пустого списка: не падаем, а честно сообщаем.
+  if (!Array.isArray(LESSONS) || LESSONS.length === 0) {
+    $("content").innerHTML = "<p>Уроки не найдены.</p>";
+    return;
+  }
+  setupTheme();
+  buildSidebar();
+  goTo(0);
+}
+
+init();
+</script>
+</body>
+</html>
