@@ -332,15 +332,12 @@
 
   @media (max-width: 860px) {
     .layout { grid-template-columns: 1fr; }
-    nav.lessons {
-      border-right: none;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    nav.lessons h2 { width: 100%; }
-    .lesson-btn { width: auto; }
+    /* На узком экране список уроков свёрнут в одну кнопку (.lessons-toggle):
+       17 кнопок иначе занимают полэкрана над уроком. */
+    nav.lessons { padding: 10px 12px; }
+    nav.lessons h2 { display: none; }
+    .lesson-btn { display: none; }
+    nav.lessons.open .lesson-btn { display: flex; }
     main.content { padding: 20px 16px 50px; }
     .sandbox { grid-template-columns: 1fr; }
     .editor-pane, .preview-pane { min-height: 340px; }
@@ -663,6 +660,42 @@
     font-size: .72rem;
   }
   .foot-tag { color: var(--accent); margin: 0 8px; }
+  /* --- Меню уроков на телефоне: одна кнопка вместо списка --- */
+  .lessons-toggle { display: none; }
+  @media (max-width: 860px) {
+    /* Шапка не должна быть шире экрана: служебную метку версии прячем. */
+    header.top { padding: 10px 12px; gap: 10px; }
+    .reg { display: none; }
+
+    /* Меню берёт высоту по содержимому (раскрытое — не больше 2/3 экрана),
+       урок — всё остальное. Иначе они делят экран поровну. */
+    .layout { grid-template-rows: auto minmax(0, 1fr); }
+    nav.lessons { border-right: none; border-bottom: 2px solid var(--text); }
+    nav.lessons.open { max-height: 66vh; }
+    .lessons-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 10px 12px;
+      font-family: var(--display);
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+      text-align: left;
+      color: var(--text);
+      background: var(--bg);
+      border: 2px solid var(--text);
+      border-radius: 0;
+      cursor: pointer;
+    }
+    .lt-tag { flex: none; font-family: var(--mono); font-size: .7rem; color: var(--accent); }
+    .lt-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .lt-arrow { flex: none; transition: transform .15s; }
+    nav.lessons.open .lt-arrow { transform: rotate(180deg); }
+    nav.lessons.open .lessons-toggle { margin-bottom: 8px; }
+  }
 </style>
 </head>
 <body>
@@ -674,12 +707,17 @@
     <span class="sub">SYS // интерактивный протокол вёрстки</span>
   </div>
   <button class="theme-toggle" id="themeToggle" type="button">☾ ТЬМА</button>
-  <span class="reg">BUILD v6 · REC °</span>
+  <span class="reg">BUILD v6.1 · REC °</span>
 </header>
 <div class="hazard"></div>
 
 <div class="layout">
   <nav class="lessons" id="lessonList">
+    <button class="lessons-toggle" id="lessonsToggle" type="button" aria-expanded="false" aria-controls="lessonList">
+      <span class="lt-tag">// Урок</span>
+      <span class="lt-title" id="lessonsToggleTitle"></span>
+      <span class="lt-arrow">▾</span>
+    </button>
     <h2>Содержание</h2>
     <!-- кнопки уроков добавит скрипт -->
   </nav>
@@ -2073,7 +2111,20 @@ function goTo(index) {
   setActiveButton(index);
   if (lesson.onMount) lesson.onMount();   // интерактив внутри теории (демка flexbox)
 
-  document.querySelector("main.content").scrollTop = 0;   // новый урок — к началу
+  // Кнопка меню на телефоне показывает текущий урок; после выбора список сворачиваем.
+  $("lessonsToggleTitle").textContent = `${index + 1}. ${lesson.title}`;
+  setLessonsOpen(false);
+
+  // Новый урок — к началу. На компьютере прокручивается колонка урока,
+  // на телефоне — вся страница, поэтому сбрасываем обе.
+  document.querySelector("main.content").scrollTop = 0;
+  window.scrollTo(0, 0);
+}
+
+/* Раскрыть / свернуть список уроков (кнопка видна только на узком экране). */
+function setLessonsOpen(open) {
+  $("lessonList").classList.toggle("open", open);
+  $("lessonsToggle").setAttribute("aria-expanded", String(open));
 }
 
 /* --- Песочница ------------------------------------------- */
@@ -2230,6 +2281,9 @@ function init() {
   }
   setupTheme();
   buildSidebar();
+  $("lessonsToggle").addEventListener("click", () => {
+    setLessonsOpen(!$("lessonList").classList.contains("open"));
+  });
   goTo(0);
 }
 
